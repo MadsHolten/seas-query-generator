@@ -1,0 +1,14 @@
+{
+  "name": "seas-calc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc examples.ts || node examples.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "underscore.string": "^3.3.4"
+  }
+}
