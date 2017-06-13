@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc examples.ts || node examples.js"
+    "start": "node examples/example3.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "underscore": "^1.8.3",
     "underscore.string": "^3.3.4"
   }
 }
