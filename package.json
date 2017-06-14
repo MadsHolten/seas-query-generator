@@ -1,5 +1,5 @@
 {
-  "name": "seas-sparql-generator",
+  "name": "seas-query-generator",
   "version": "0.1.0",
   "description": "A SPARQL query generator for handling SEAS calculation data.",
   "main": "dist/index.js",
@@ -7,12 +7,7 @@
     "start": "tsc || node examples/example3.js"
   },
   "author": "Mads Holten Rasmussen <mhoras@byg.dtu.dk> (http://www.dtu.dk/service/telefonbog/person?id=42843&cpid=202565&tab=3&qt=dtuprojectquery)",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/brentertz/scapegoat/blob/master/LICENSE-MIT"
-    }
-  ], 
+  "license": "MIT", 
   "repository": {
     "type": "git",
     "url": "https://github.com/MadsHolten/seas-calc.git"
