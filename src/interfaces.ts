@@ -6,15 +6,27 @@ export interface ICalc {
     prefixes: IPrefix[];
 }
 
+export interface IProp {
+    resourceURI?: string;
+    pattern: string;
+    value: IVal;
+    hostURI: string;
+    prefixes: IPrefix[];
+}
+
 export interface IArgs {
     property: string;
     targetPath?: string;
 }
 
-export interface IRes {
+export interface IVal {
     unit?: string;
     datatype?: string;
     property: string;
+    value?: string;
+}
+
+export interface IRes extends IVal {
     calc: string;
 }
 

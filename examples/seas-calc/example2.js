@@ -1,5 +1,5 @@
 "use strict";
-var seas_calc = require("../dist/index");
+var seas_calc = require("../../dist/index");
 /**
  * EXAMPLE 2
  * target paths for multiple resources

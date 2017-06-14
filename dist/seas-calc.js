@@ -18,17 +18,21 @@ var SeasCalc = (function () {
         if (!_.contains(prefixes, 'prov')) {
             this.input.prefixes.push({ prefix: 'prov', uri: 'http://www.w3.org/ns/prov#' });
         }
+        //Remove backslash at end of hostURI
+        this.input.hostURI.replace(/\/$/, "");
+        //datatype defaults to xsd:string
+        this.input.result.datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string';
     }
     //Create calculation where it doesn't already exist
     SeasCalc.prototype.postCalc = function () {
-        //Retrieve and process variables
-        var hostURI = this.input.hostURI.replace(/\/$/, ""); //The host URI (remove backslash at end)
+        //Define variables
+        var hostURI = this.input.hostURI; //The host URI
         var calc = this.input.result.calc; //The calculation to perform
         var args = this.input.args; //Arguments
         var property = this.input.result.property; //New property
         var resourceURI = this.input.resourceURI; //optional
-        var unit = this.input.result.unit; //optional
-        var datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string'; //optional - defaults to xsd:string
+        var unit = this.input.result.unit;
+        var datatype = this.input.result.datatype;
         var resource = !resourceURI ? '?resource' : '<' + resourceURI + '>';
         var prefixes = this.input.prefixes;
         for (var i in args) {
@@ -55,7 +59,7 @@ var SeasCalc = (function () {
         for (var i in prefixes) {
             q += "PREFIX  " + prefixes[i].prefix + ": <" + prefixes[i].uri + "> \n";
         }
-        q += "CONSTRUCT \n            {\n                " + resource + " " + property + " ?propertyURI .\n                ?propertyURI seas:evaluation ?evaluationURI .\n                ?evaluationURI seas:evaluatedValue ?res ;\n                                prov:wasGeneratedAtTime ?now ;\n                                seas:calculation \"" + calc + "\"^^" + datatype + " ;\n                                prov:wasDerivedFrom _:c0 .\n                _:c0 a rdf:Seq . \n";
+        q += "CONSTRUCT \n            {\n                " + resource + " " + property + " ?propertyURI .\n                ?propertyURI seas:evaluation ?evaluationURI .\n                ?evaluationURI seas:evaluatedValue ?res ;\n                                prov:wasGeneratedAtTime ?now ;\n                                seas:calculation \"" + calc + "\"^^xsd:string ;\n                                prov:wasDerivedFrom _:c0 .\n                _:c0 a rdf:Seq . \n";
         for (var i in args) {
             var _i = Number(i) + 1;
             q += "_:c0 rdf:_" + _i + " ?eval" + _i + " . \n";
