@@ -85,9 +85,10 @@ var SeasProp = (function () {
         for (var i in prefixes) {
             q += "PREFIX  " + prefixes[i].prefix + ": <" + prefixes[i].uri + "> \n";
         }
-        q += "CONSTRUCT\n              {\n                ?propertyURI seas:evaluation ?evaluationURI .\n                ?evaluationURI seas:evaluatedValue ?val ;\n                               prov:wasGeneratedAtTime ?now .\n              }\n             WHERE {\n              {SELECT ?propertyURI WHERE { \n                  GRAPH ?g {\n                      " + resourceURI + " " + property + " ?propertyURI . \n                      ?propertyURI seas:evaluation ?eval . \n";
+        //Only makes an update if the value is different from the last evaluation
+        q += "CONSTRUCT\n              {\n                ?propertyURI seas:evaluation ?evaluationURI .\n                ?evaluationURI seas:evaluatedValue ?val ;\n                               prov:wasGeneratedAtTime ?now .\n              }\n             WHERE {\n              {SELECT ?propertyURI (MAX(?_t) AS ?t) WHERE { \n                  GRAPH ?g {\n                      " + resourceURI + " " + property + " ?propertyURI . \n                      ?propertyURI seas:evaluation ?eval . \n                      ?eval prov:wasGeneratedAtTime ?_t . \n";
         q += pattern ? pattern + '\n' : '\n';
-        q += "} } GROUP BY ?propertyURI }\n              GRAPH ?g { " + resourceURI + " " + property + " ?propertyURI }\n              BIND(strdt(concat(str(" + value + "), \" " + unit + "\"), " + datatype + ") AS ?val)\n              BIND(REPLACE(STR(UUID()), \"urn:uuid:\", \"\") AS ?guid)\n              BIND(URI(CONCAT(\"" + hostURI + "\", \"/Evaluation/\", ?guid)) AS ?evaluationURI)\n              BIND(now() AS ?now)\n             }";
+        q += "} } GROUP BY ?propertyURI }\n              GRAPH ?g { \n                  " + resourceURI + " " + property + " ?propertyURI .\n                  ?propertyURI seas:evaluation [ prov:wasGeneratedAtTime ?t ;\n                                                 seas:evaluatedValue ?old_val ] .\n                  FILTER(strbefore(str(?old_val), \" \") != str(" + value + "))\n              }\n              BIND(strdt(concat(str(" + value + "), \" " + unit + "\"), " + datatype + ") AS ?val)\n              BIND(REPLACE(STR(UUID()), \"urn:uuid:\", \"\") AS ?guid)\n              BIND(URI(CONCAT(\"" + hostURI + "\", \"/Evaluation/\", ?guid)) AS ?evaluationURI)\n              BIND(now() AS ?now)\n             }";
         if (this.err) {
             q = 'Error: ' + this.err;
         }

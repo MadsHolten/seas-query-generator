@@ -108,6 +108,7 @@ export class SeasProp {
             q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
         }
 
+        //Only makes an update if the value is different from the last evaluation
         q+= `CONSTRUCT
               {
                 ?propertyURI seas:evaluation ?evaluationURI .
@@ -115,13 +116,19 @@ export class SeasProp {
                                prov:wasGeneratedAtTime ?now .
               }
              WHERE {
-              {SELECT ?propertyURI WHERE { 
+              {SELECT ?propertyURI (MAX(?_t) AS ?t) WHERE { 
                   GRAPH ?g {
                       ${resourceURI} ${property} ?propertyURI . 
-                      ?propertyURI seas:evaluation ?eval . \n`;
+                      ?propertyURI seas:evaluation ?eval . 
+                      ?eval prov:wasGeneratedAtTime ?_t . \n`;
         q+= pattern ? pattern+'\n' : '\n';
         q+=  `} } GROUP BY ?propertyURI }
-              GRAPH ?g { ${resourceURI} ${property} ?propertyURI }
+              GRAPH ?g { 
+                  ${resourceURI} ${property} ?propertyURI .
+                  ?propertyURI seas:evaluation [ prov:wasGeneratedAtTime ?t ;
+                                                 seas:evaluatedValue ?old_val ] .
+                  FILTER(strbefore(str(?old_val), " ") != str(${value}))
+              }
               BIND(strdt(concat(str(${value}), " ${unit}"), ${datatype}) AS ?val)
               BIND(REPLACE(STR(UUID()), "urn:uuid:", "") AS ?guid)
               BIND(URI(CONCAT("${hostURI}", "/Evaluation/", ?guid)) AS ?evaluationURI)
