@@ -130,7 +130,9 @@ var SeasCalc = (function () {
         //Get the time of the latest input values
         q += "{ SELECT  ?old_arg (MAX(?_t) AS ?t)\n                WHERE\n                    { GRAPH ?g\n                        { ?old_arg ^seas:evaluation/seas:evaluation ?arg .\n                            ?arg  prov:wasGeneratedAtTime  ?_t\n                        }\n                    }\n                GROUP BY ?old_arg\n             }";
         //Get the values of these arguments
-        q += "GRAPH ?g {\n                ?old_arg ^seas:evaluation/seas:evaluation ?new_arg .\n                ?new_arg prov:wasGeneratedAtTime  ?t ;\n                seas:evaluatedValue ?new_arg_val ;\n            }";
+        q += "GRAPH ?g {\n                ?old_arg ^seas:evaluation/seas:evaluation ?new_arg .\n                ?new_arg prov:wasGeneratedAtTime  ?t ;\n                         seas:evaluatedValue ?new_arg_val ;\n            }";
+        //Should put arguments in separate variables based on list position
+        //Even possible?
         q += "BIND(str(540) AS ?_res)\n             BIND(datatype(?old_res) AS ?datatype)\n             BIND(strafter(str(?old_res), \" \") AS ?unit)\n             BIND(strdt(concat(str(?_res), \" \", ?unit), ?datatype) AS ?res)\n             BIND(REPLACE(STR(UUID()), \"urn:uuid:\", \"\") AS ?guid)\n             BIND(URI(CONCAT(\"" + hostURI + "\", \"/Evaluation/\", ?guid)) AS ?evaluationURI)\n             BIND(now() AS ?now)";
         q += "}";
         return q;

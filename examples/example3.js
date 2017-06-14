@@ -1,5 +1,5 @@
 "use strict";
-var seas_calc = require("../src/seas-calc");
+var seas_calc = require("../dist/seas-calc");
 /**
  * EXAMPLE 3
  * properties of a resource itself

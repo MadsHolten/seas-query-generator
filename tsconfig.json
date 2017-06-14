@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "outDir": "dist"
+    },
+    "files": [
+        "src/interface.ts",
+        "src/seas-calc.ts"
+    ]
+}

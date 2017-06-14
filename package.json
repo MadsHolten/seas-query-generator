@@ -1,15 +1,18 @@
 {
-  "name": "seas-calc",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "seas-query-generator",
+  "version": "0.0.0",
+  "description": "A SPARQL query generator for handling SEAS calculation data.",
+  "main": "dist/seas-calc.js",
   "scripts": {
-    "start": "node examples/example3.js"
+    "start": "tsc || node examples/example3.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Mads Holten Rasmussen <mhoras@byg.dtu.dk> (http://www.dtu.dk/service/telefonbog/person?id=42843&cpid=202565&tab=3&qt=dtuprojectquery)",
+  "license": "MIT",
   "dependencies": {
     "underscore": "^1.8.3",
     "underscore.string": "^3.3.4"
+  },
+  "devDependencies": {
+    "typescript": "^2.0.0"
   }
 }
