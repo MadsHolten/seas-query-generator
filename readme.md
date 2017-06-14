@@ -112,21 +112,25 @@ var dboptions = {
                         'Accept': 'application/n-triples' 
                     }
                 }
-return rp(dboptions).then(d => {
-    if(!d){
-        err = "All calculated values are up to date";
-        throw err;
-    }else{
-        //Isert the triples in the named graph
-        var q: string = `INSERT DATA {
-                         GRAPH <${graphURI}> { ${d} }}`;
-        dboptions.qs = q;
-        dboptions.method = 'POST';
-        dboptions.uri = 'http://host/proj/update';
-        dboptions.headers = {'Accept': 'application/n-triples'};
-        return rp(dboptions);
-    }.catch(err => {
-        next(err);
-    });
-})
+return rp(dboptions)
+        .then(d => {
+            if(!d){
+                err = "All calculated values are up to date";
+                throw err;
+            }else{
+                //Isert the triples in the named graph
+                var q: string = `INSERT DATA {
+                                 GRAPH <${graphURI}> { ${d} }}`;
+                dboptions.qs = q;
+                dboptions.method = 'POST';
+                dboptions.uri = 'http://host/proj/update';
+                dboptions.headers = {'Accept': 'application/n-triples'};
+                return rp(dboptions);
+            }
+        }).then(d => {
+            return 'Successfully added calculations';
+        }
+        .catch(err => {
+            next(err);
+        });
 ```
