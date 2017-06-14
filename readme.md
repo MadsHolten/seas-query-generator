@@ -107,7 +107,7 @@ var dboptions = {
                         password: 'pw'
                     },
                     method: 'GET',
-                    body: {query: query},
+                    qs: {query: query},
                     headers: { 
                         'Accept': 'application/n-triples' 
                     }
@@ -121,7 +121,7 @@ return rp(dboptions)
                 //Isert the triples in the named graph
                 var q: string = `INSERT DATA {
                                  GRAPH <${graphURI}> { ${d} }}`;
-                dboptions.body = {query: query};
+                dboptions.qs = {query: query};
                 dboptions.method = 'POST';
                 dboptions.uri = 'http://host/proj/update';
                 dboptions.headers = {'Accept': 'application/n-triples'};
