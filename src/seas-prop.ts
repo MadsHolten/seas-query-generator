@@ -72,7 +72,6 @@ export class SeasProp {
               }
              WHERE {
               ${pattern}
-              # NO PREVIOUS PROPERTIES MUST EXIST
               MINUS
               { GRAPH ?g
                 { ${resourceURI} ${property}/seas:evaluation ?eval }
