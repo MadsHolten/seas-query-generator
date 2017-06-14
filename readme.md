@@ -73,3 +73,60 @@ var input = {
     resourceURI: 'https://localhost/seas/HeatingSystem/6626b0b1-3578-4f1e-a6ec-91c7c59fb143', ...
 };
 ```
+
+### Calling an endpoint
+Example of how a SPARQL endpoint can be called using request-promise
+```javascript
+import * as rp from "request-promise";
+var seas_calc = require("seas-query-generator");
+
+var input = {
+    args: [
+        { property: 'seas:fluidSupplyTemperature' },
+        { property: 'seas:fluidReturnTemperature' }
+    ],
+    result: {
+        unit: 'Cel',
+        datatype: 'cdt:ucum',
+        property: 'seas:fluidTemperatureDifference',
+        calc: 'abs(?arg1-?arg2)'
+    },
+    hostURI: 'https://host/proj',
+    prefixes: [
+        {prefix: 'cdt', uri: 'http://w3id.org/lindt/custom_datatypes#'}
+    ]
+};
+
+var sqg = new seas_calc.SeasCalc(input);
+var query = sqg.postCalc();
+
+var dboptions = {
+                    uri: 'http://host/proj/query',
+                    auth: {
+                        username: 'user',
+                        password: 'pw'
+                    },
+                    method: 'GET',
+                    qs: query,
+                    headers: { 
+                        'Accept': 'application/n-triples' 
+                    }
+                }
+return rp(dboptions).then(d => {
+    if(!d){
+        err = "All calculated values are up to date";
+        throw err;
+    }else{
+        //Isert the triples in the named graph
+        var q: string = `INSERT DATA {
+                         GRAPH <${graphURI}> { ${d} }}`;
+        dboptions.qs = q;
+        dboptions.method = 'POST';
+        dboptions.uri = 'http://host/proj/update';
+        dboptions.headers = {'Accept': 'application/n-triples'};
+        return rp(dboptions);
+    }.catch(err => {
+        next(err);
+    });
+})
+```
