@@ -36,10 +36,9 @@ export class SeasProp {
                 var str: string = this.input.pattern;
                 str = _s.clean(str); //Remove unnecessary spaces etc.
                 str = _s.endsWith(str,".") ? str+' ' : str+' . '; //Make sure it ends with a dot and a space
-                this.input.pattern = `{ SELECT * WHERE { GRAPH ?g {${str}} }}`;
+                this.input.pattern = str;
             }
         }else{
-            this.input.pattern = `{ SELECT * WHERE { GRAPH ?g {<${this.input.resourceURI}> ?p ?o} }LIMIT 1}`;
             this.input.resourceURI = `<${this.input.resourceURI}>`;
         }
     }
@@ -54,8 +53,12 @@ export class SeasProp {
         var unit = this.input.value.unit;
         var datatype = this.input.value.datatype;
         var hostURI = this.input.hostURI;
-        var pattern = this.input.pattern;
         var resourceURI = this.input.resourceURI;
+        if(resourceURI == '?resource'){
+            var pattern = `{ SELECT * WHERE { GRAPH ?g {${this.input.pattern}} }}`;
+        }else{
+            var pattern = `{ SELECT * WHERE { GRAPH ?g {${resourceURI} ?p ?o} } LIMIT 1}`;
+        }
 
         var q: string = '';
         //Define prefixes
@@ -80,6 +83,49 @@ export class SeasProp {
               BIND(REPLACE(STR(UUID()), "urn:uuid:", "") AS ?guid)
               BIND(URI(CONCAT("${hostURI}", "/Property/", ?guid)) AS ?propertyURI)
               BIND(URI(CONCAT("${hostURI}", "/Evaluation/", ?guid)) AS ?evaluationURI)
+              BIND(now() AS ?now)
+             }`
+        if(this.err){q = 'Error: '+this.err;}
+        return q;
+    }
+
+    //Update property
+    putProp(): string{
+        //Retrieve and process variables
+        var prefixes = this.input.prefixes;
+        var resource = this.input.resourceURI;
+        var property = this.input.value.property;
+        var value = this.input.value.value;
+        var unit = this.input.value.unit;
+        var datatype = this.input.value.datatype;
+        var hostURI = this.input.hostURI;
+        var pattern = this.input.pattern;
+        var resourceURI = this.input.resourceURI;
+
+        var q: string = '';
+        //Define prefixes
+        for(var i in prefixes){
+            q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
+        }
+
+        q+= `CONSTRUCT
+              {
+                ?propertyURI seas:evaluation ?evaluationURI .
+                ?evaluationURI seas:evaluatedValue ?val ;
+                               prov:wasGeneratedAtTime ?now .
+              }
+             WHERE {
+              {SELECT ?propertyURI WHERE { 
+                  GRAPH ?g {
+                      ${resourceURI} ${property} ?propertyURI . 
+                      ?propertyURI seas:evaluation ?eval . \n`;
+        q+= pattern ? pattern+'\n' : '\n';
+        q+=  `} } GROUP BY ?propertyURI }
+              GRAPH ?g { ${resourceURI} ${property} ?propertyURI }
+              BIND(strdt(concat(str(${value}), " ${unit}"), ${datatype}) AS ?val)
+              BIND(REPLACE(STR(UUID()), "urn:uuid:", "") AS ?guid)
+              BIND(URI(CONCAT("${hostURI}", "/Evaluation/", ?guid)) AS ?evaluationURI)
+              BIND(now() AS ?now)
              }`
         if(this.err){q = 'Error: '+this.err;}
         return q;
