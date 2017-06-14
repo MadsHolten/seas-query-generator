@@ -1,5 +1,5 @@
 {
-  "name": "seas-calc",
+  "name": "seas-sparql-generator",
   "version": "0.1.0",
   "description": "A SPARQL query generator for handling SEAS calculation data.",
   "main": "dist/index.js",
