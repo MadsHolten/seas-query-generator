@@ -4,6 +4,6 @@
     },
     "files": [
         "src/interface.ts",
-        "src/seas-calc.ts"
+        "src/index.ts"
     ]
 }
