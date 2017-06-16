@@ -23,6 +23,9 @@ export class SeasProp {
         if(!_.contains(prefixes, 'prov')){
             this.input.prefixes.push({prefix: 'prov', uri: 'http://www.w3.org/ns/prov#'});
         }
+        if(!_.contains(prefixes, 'rdfs')){
+            this.input.prefixes.push({prefix: 'rdfs', uri: 'http://www.w3.org/2000/01/rdf-schema#'});
+        }
         //Remove backslash at end of hostURI
         this.input.hostURI ? this.input.hostURI.replace(/\/$/, "") : null;
         //datatype defaults to xsd:string
@@ -138,6 +141,39 @@ export class SeasProp {
               BIND(now() AS ?now)
              }`
         if(this.err){q = 'Error: '+this.err;}
+        return q;
+    }
+
+    getProps(): string {
+        var prefixes = this.input.prefixes;
+        var resource = this.input.resourceURI ? `${this.input.resourceURI}` : '?resource';
+        var strLang = this.input.language;
+        var evalPath: string = '';
+
+        var q: string = '';
+        //Define prefixes
+        for(var i in prefixes){
+            q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
+        }
+
+        q+= `SELECT ?resource ?property ?value ?lastUpdated ?g ?uri ?evaluation ?label `;
+        q+= `WHERE { GRAPH ?g {
+                {
+                  SELECT ?property (MAX(?timestamp) AS ?lastUpdated)
+                  WHERE {
+                    ${resource} ?property [ seas:evaluation [ prov:wasGeneratedAtTime ?timestamp ] ] .
+                  }
+                  GROUP BY ?property
+                }
+            OPTIONAL{ GRAPH ?gy {?property rdfs:label ?label}
+                FILTER(lang(?label)="${strLang}")
+            }
+            ?resource ?property ?uri .
+            ?uri seas:evaluation ?evaluation .
+            ?evaluation prov:wasGeneratedAtTime ?lastUpdated ; 
+                        seas:evaluatedValue ?value .
+        }}`;
+
         return q;
     }
 }

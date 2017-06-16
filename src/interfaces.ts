@@ -12,6 +12,7 @@ export interface IProp {
     value: IVal;
     hostURI: string;
     prefixes: IPrefix[];
+    language: string;
 }
 
 export interface IArgs {

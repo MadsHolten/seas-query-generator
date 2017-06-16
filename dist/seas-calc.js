@@ -150,7 +150,6 @@ var SeasCalc = (function () {
     //List outdated calculations
     //Checks either generally or for a specific resource
     //Returns the following:
-    //propertyURI
     SeasCalc.prototype.listOutdated = function () {
         var prefixes = this.input.prefixes;
         var resourceURI = this.input.resourceURI;
@@ -163,7 +162,7 @@ var SeasCalc = (function () {
         for (var i in prefixes) {
             q += "PREFIX  " + prefixes[i].prefix + ": <" + prefixes[i].uri + "> \n";
         }
-        q += "SELECT ?propertyURI ?calc_time ?arg_last_update ?new_arg ?old_val ?new_val WHERE {";
+        q += "SELECT ?propertyURI ?calc_time ?arg_last_update ?new_arg ?old_val ?new_val \n             WHERE {";
         //Get the time of the latest calculation
         //Property has seas:evaluation that is derived from something else
         q += "{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)\n                WHERE\n                    { GRAPH ?g\n                        { " + evalPath + "\n                          ?propertyURI seas:evaluation _:b0 .\n                          _:b0 prov:wasDerivedFrom+ [?p ?o] .\n                          _:b0 prov:wasGeneratedAtTime ?tc .\n                        }\n                    }\n                GROUP BY ?propertyURI\n             }";
