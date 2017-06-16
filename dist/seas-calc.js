@@ -6,6 +6,10 @@ var SeasCalc = (function () {
         this.input = input;
         //Add predefined prefixes
         var prefixes = _.pluck(this.input.prefixes, 'prefix');
+        if (!this.input.prefixes) {
+            this.input.prefixes = [];
+        }
+        ;
         if (!_.contains(prefixes, 'rdf')) {
             this.input.prefixes.push({ prefix: 'rdf', uri: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' });
         }
@@ -19,9 +23,11 @@ var SeasCalc = (function () {
             this.input.prefixes.push({ prefix: 'prov', uri: 'http://www.w3.org/ns/prov#' });
         }
         //Remove backslash at end of hostURI
-        this.input.hostURI.replace(/\/$/, "");
+        this.input.hostURI ? this.input.hostURI.replace(/\/$/, "") : null;
         //datatype defaults to xsd:string
-        this.input.result.datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string';
+        if (this.input.result) {
+            this.input.result.datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string';
+        }
     }
     //Create calculation where it doesn't already exist
     SeasCalc.prototype.postCalc = function () {
@@ -139,6 +145,36 @@ var SeasCalc = (function () {
         //Even possible?
         q += "BIND(str(540) AS ?_res)\n             BIND(datatype(?old_res) AS ?datatype)\n             BIND(strafter(str(?old_res), \" \") AS ?unit)\n             BIND(strdt(concat(str(?_res), \" \", ?unit), ?datatype) AS ?res)\n             BIND(REPLACE(STR(UUID()), \"urn:uuid:\", \"\") AS ?guid)\n             BIND(URI(CONCAT(\"" + hostURI + "\", \"/Evaluation/\", ?guid)) AS ?evaluationURI)\n             BIND(now() AS ?now)";
         q += "}";
+        return q;
+    };
+    //List outdated calculations
+    //Checks either generally or for a specific resource
+    //Returns the following:
+    //propertyURI
+    SeasCalc.prototype.listOutdated = function () {
+        var prefixes = this.input.prefixes;
+        var resourceURI = this.input.resourceURI;
+        var evalPath = '';
+        if (resourceURI) {
+            evalPath = "<" + resourceURI + "> ?hasProp ?propertyURI . ";
+        }
+        var q = '';
+        //Define prefixes
+        for (var i in prefixes) {
+            q += "PREFIX  " + prefixes[i].prefix + ": <" + prefixes[i].uri + "> \n";
+        }
+        q += "SELECT ?propertyURI ?calc_time ?arg_last_update ?new_arg ?old_val ?new_val WHERE {";
+        //Get the time of the latest calculation
+        //Property has seas:evaluation that is derived from something else
+        q += "{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)\n                WHERE\n                    { GRAPH ?g\n                        { " + evalPath + "\n                          ?propertyURI seas:evaluation _:b0 .\n                          _:b0 prov:wasDerivedFrom+ [?p ?o] .\n                          _:b0 prov:wasGeneratedAtTime ?tc .\n                        }\n                    }\n                GROUP BY ?propertyURI\n             }";
+        //Get data about calculation
+        q += "GRAPH ?g\n                { " + evalPath + "\n                  ?propertyURI seas:evaluation _:b1 .\n                  _:b1 prov:wasDerivedFrom+ [?position ?old_arg] .\n                  _:b1 prov:wasGeneratedAtTime ?calc_time .\n                  _:b1 seas:evaluatedValue ?old_val .\n                }";
+        //Get the time of the latest input values
+        q += "{ SELECT  ?old_arg (MAX(?ta) AS ?arg_last_update)\n                WHERE\n                    { GRAPH ?g\n                        { ?old_arg ^seas:evaluation/seas:evaluation ?arg .\n                          ?arg prov:wasGeneratedAtTime ?ta .\n                        }\n                    }\n                GROUP BY ?old_arg\n             }";
+        //Get argument values
+        q += "GRAPH ?g\n                {\n                  ?old_arg ^seas:evaluation/seas:evaluation ?new_arg .\n                  ?new_arg prov:wasGeneratedAtTime  ?arg_last_update ;\n                           seas:evaluatedValue ?new_val .\n                }";
+        //Filter to only show outdated calculations
+        q += "FILTER(?arg_last_update > ?calc_time) }";
         return q;
     };
     return SeasCalc;

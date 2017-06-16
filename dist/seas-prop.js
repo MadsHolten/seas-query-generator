@@ -6,6 +6,10 @@ var SeasProp = (function () {
         this.input = input;
         //Add predefined prefixes
         var prefixes = _.pluck(this.input.prefixes, 'prefix');
+        if (!this.input.prefixes) {
+            this.input.prefixes = [];
+        }
+        ;
         if (!_.contains(prefixes, 'rdf')) {
             this.input.prefixes.push({ prefix: 'rdf', uri: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' });
         }
@@ -19,9 +23,11 @@ var SeasProp = (function () {
             this.input.prefixes.push({ prefix: 'prov', uri: 'http://www.w3.org/ns/prov#' });
         }
         //Remove backslash at end of hostURI
-        this.input.hostURI.replace(/\/$/, "");
+        this.input.hostURI ? this.input.hostURI.replace(/\/$/, "") : null;
         //datatype defaults to xsd:string
-        this.input.value.datatype = this.input.value.datatype ? this.input.value.datatype : 'xsd:string';
+        if (this.input.value) {
+            this.input.value.datatype = this.input.value.datatype ? this.input.value.datatype : 'xsd:string';
+        }
         //If no resource URI is specified, some pattern must exist
         if (!this.input.resourceURI) {
             if (!this.input.pattern) {

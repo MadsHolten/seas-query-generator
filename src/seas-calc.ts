@@ -10,6 +10,7 @@ export class SeasCalc {
         this.input = input;
         //Add predefined prefixes
         var prefixes: string[] = _.pluck(this.input.prefixes, 'prefix');
+        if(!this.input.prefixes){this.input.prefixes = []};
         if(!_.contains(prefixes, 'rdf')){
             this.input.prefixes.push({prefix: 'rdf', uri: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'});
         }
@@ -23,9 +24,11 @@ export class SeasCalc {
             this.input.prefixes.push({prefix: 'prov', uri: 'http://www.w3.org/ns/prov#'});
         }
         //Remove backslash at end of hostURI
-        this.input.hostURI.replace(/\/$/, "");
+        this.input.hostURI ? this.input.hostURI.replace(/\/$/, "") : null;
         //datatype defaults to xsd:string
-        this.input.result.datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string';
+        if(this.input.result){
+            this.input.result.datatype = this.input.result.datatype ? this.input.result.datatype : 'xsd:string';
+        }
     }
 
     //Create calculation where it doesn't already exist
@@ -228,6 +231,66 @@ export class SeasCalc {
              BIND(now() AS ?now)`;
         q+= `}`
 
+        return q;
+    }
+    //List outdated calculations
+    //Checks either generally or for a specific resource
+    //Returns the following:
+    listOutdated(): string{
+        var prefixes = this.input.prefixes;
+        var resourceURI = this.input.resourceURI;
+        var evalPath: string = '';
+        if(resourceURI){
+            evalPath = `<${resourceURI}> ?hasProp ?propertyURI . `;
+        }
+        var q = '';
+        //Define prefixes
+        for(var i in prefixes){
+            q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
+        }
+        q+= `SELECT ?propertyURI ?calc_time ?arg_last_update ?new_arg ?old_val ?new_val 
+             WHERE {`;
+        //Get the time of the latest calculation
+        //Property has seas:evaluation that is derived from something else
+        q+= `{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)
+                WHERE
+                    { GRAPH ?g
+                        { ${evalPath}
+                          ?propertyURI seas:evaluation _:b0 .
+                          _:b0 prov:wasDerivedFrom+ [?p ?o] .
+                          _:b0 prov:wasGeneratedAtTime ?tc .
+                        }
+                    }
+                GROUP BY ?propertyURI
+             }`;
+        //Get data about calculation
+        q+= `GRAPH ?g
+                { ${evalPath}
+                  ?propertyURI seas:evaluation _:b1 .
+                  _:b1 prov:wasDerivedFrom+ [?position ?old_arg] .
+                  _:b1 prov:wasGeneratedAtTime ?calc_time .
+                  _:b1 seas:evaluatedValue ?old_val .
+                }`;
+        //Get the time of the latest input values
+        q+= `{ SELECT  ?old_arg (MAX(?ta) AS ?arg_last_update)
+                WHERE
+                    { GRAPH ?g
+                        { ?old_arg ^seas:evaluation/seas:evaluation ?arg .
+                          ?arg prov:wasGeneratedAtTime ?ta .
+                        }
+                    }
+                GROUP BY ?old_arg
+             }`;
+        //Get argument values
+        q+= `GRAPH ?g
+                {
+                  ?old_arg ^seas:evaluation/seas:evaluation ?new_arg .
+                  ?new_arg prov:wasGeneratedAtTime  ?arg_last_update ;
+                           seas:evaluatedValue ?new_val .
+                }`;
+        //Filter to only show outdated calculations
+        q+= `FILTER(?arg_last_update > ?calc_time) }`;
+        
         return q;
     }
 
