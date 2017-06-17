@@ -254,7 +254,7 @@ export class SeasCalc {
         //Property has seas:evaluation that is derived from something else
         q+= `{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)
                 WHERE
-                    { GRAPH ?g
+                    { GRAPH ?gi
                         { ${evalPath}
                           ?propertyURI seas:evaluation _:b0 .
                           _:b0 prov:wasDerivedFrom+ [?p ?o] .
@@ -264,7 +264,7 @@ export class SeasCalc {
                 GROUP BY ?propertyURI
              }`;
         //Get data about calculation
-        q+= `GRAPH ?g
+        q+= `GRAPH ?gi
                 { ${evalPath}
                   ?propertyURI seas:evaluation _:b1 .
                   _:b1 prov:wasDerivedFrom+ [?position ?old_arg] .
