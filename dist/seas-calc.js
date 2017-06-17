@@ -165,9 +165,9 @@ var SeasCalc = (function () {
         q += "SELECT ?propertyURI ?calc_time ?arg_last_update ?new_arg ?old_val ?new_val \n             WHERE {";
         //Get the time of the latest calculation
         //Property has seas:evaluation that is derived from something else
-        q += "{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)\n                WHERE\n                    { GRAPH ?g\n                        { " + evalPath + "\n                          ?propertyURI seas:evaluation _:b0 .\n                          _:b0 prov:wasDerivedFrom+ [?p ?o] .\n                          _:b0 prov:wasGeneratedAtTime ?tc .\n                        }\n                    }\n                GROUP BY ?propertyURI\n             }";
+        q += "{ SELECT  ?propertyURI (MAX(?tc) AS ?calc_time)\n                WHERE\n                    { GRAPH ?gi\n                        { " + evalPath + "\n                          ?propertyURI seas:evaluation _:b0 .\n                          _:b0 prov:wasDerivedFrom+ [?p ?o] .\n                          _:b0 prov:wasGeneratedAtTime ?tc .\n                        }\n                    }\n                GROUP BY ?propertyURI\n             }";
         //Get data about calculation
-        q += "GRAPH ?g\n                { " + evalPath + "\n                  ?propertyURI seas:evaluation _:b1 .\n                  _:b1 prov:wasDerivedFrom+ [?position ?old_arg] .\n                  _:b1 prov:wasGeneratedAtTime ?calc_time .\n                  _:b1 seas:evaluatedValue ?old_val .\n                }";
+        q += "GRAPH ?gi\n                { " + evalPath + "\n                  ?propertyURI seas:evaluation _:b1 .\n                  _:b1 prov:wasDerivedFrom+ [?position ?old_arg] .\n                  _:b1 prov:wasGeneratedAtTime ?calc_time .\n                  _:b1 seas:evaluatedValue ?old_val .\n                }";
         //Get the time of the latest input values
         q += "{ SELECT  ?old_arg (MAX(?ta) AS ?arg_last_update)\n                WHERE\n                    { GRAPH ?g\n                        { ?old_arg ^seas:evaluation/seas:evaluation ?arg .\n                          ?arg prov:wasGeneratedAtTime ?ta .\n                        }\n                    }\n                GROUP BY ?old_arg\n             }";
         //Get argument values
