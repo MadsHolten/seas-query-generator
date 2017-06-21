@@ -7,7 +7,7 @@ SEAS query generator requires [Node.js](https://nodejs.org/) v4+ to run.
 Install it to your project
 
 ```sh
-$ npm install https://github.com/MadsHolten/seas-query-generator.git#0.1.0
+$ npm install https://github.com/MadsHolten/seas-query-generator.git#0.1.8
 ```
 
 ### Methods
