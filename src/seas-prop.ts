@@ -149,7 +149,7 @@ export class SeasProp {
         return q;
     }
 
-    //Get a single property (latest evaluation)
+    //Get a single property
     getProp(): string {
         var prefixes = this.input.prefixes;
         var resource = this.input.resourceURI ? `${this.input.resourceURI}` : '?resource';
@@ -157,7 +157,7 @@ export class SeasProp {
         var returnResource = this.input.resourceURI ? false : true;
         var latest = this.input.latest;
 
-        if(!property) return "Please specify a propertyURI";
+        if(!property) this.err = "Please specify a propertyURI";
 
         var q: string = '';
         //Define prefixes
@@ -177,6 +177,7 @@ export class SeasProp {
             q+=`GROUP BY ?value `
             q+= returnResource ? '?resource' : '';
         }
+        if(this.err){q = 'Error: '+this.err;}
         return q;
     }
 

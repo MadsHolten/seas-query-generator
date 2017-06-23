@@ -7,10 +7,10 @@ var seas_calc = require("../../dist/index");
  * 
  */
 var input = {
-    //resourceURI: "https://localhost/seas/HeatingSystem/f9a64795-58b6-4d6d-9755-e56920923db8",
+    resourceURI: "https://localhost/seas/HeatingSystem/b5f9e70e-af29-4c28-a2c5-16ff74645a66",
     //propertyURI: "seas:fluidTemperatureDifference",
     propertyURI: "https://w3id.org/seas/fluidTemperatureDifference",
-    latest: false
+    latest: true
 };
 var sc = new seas_calc.SeasProp(input);
 var q = sc.getProp();

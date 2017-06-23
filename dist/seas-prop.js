@@ -108,7 +108,7 @@ var SeasProp = (function () {
         }
         return q;
     };
-    //Get a single property (latest evaluation)
+    //Get a single property
     SeasProp.prototype.getProp = function () {
         var prefixes = this.input.prefixes;
         var resource = this.input.resourceURI ? "" + this.input.resourceURI : '?resource';
@@ -116,7 +116,7 @@ var SeasProp = (function () {
         var returnResource = this.input.resourceURI ? false : true;
         var latest = this.input.latest;
         if (!property)
-            return "Please specify a propertyURI";
+            this.err = "Please specify a propertyURI";
         var q = '';
         //Define prefixes
         for (var i in prefixes) {
@@ -129,6 +129,9 @@ var SeasProp = (function () {
         if (latest) {
             q += "GROUP BY ?value ";
             q += returnResource ? '?resource' : '';
+        }
+        if (this.err) {
+            q = 'Error: ' + this.err;
         }
         return q;
     };
