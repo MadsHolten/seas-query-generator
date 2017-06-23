@@ -47,6 +47,11 @@ export class SeasProp {
         }else{
             this.input.resourceURI = `<${this.input.resourceURI}>`;
         }
+        //PropertyURI can be either prefixed or as a regular URI
+        if(this.input.propertyURI){
+            var propertyURI = this.input.propertyURI
+            this.input.propertyURI = _s.startsWith(propertyURI, 'http') ? `<${propertyURI}>` : `${propertyURI}`;
+        }
     }
 
     //Create property where it doesn't already exist
@@ -144,6 +149,38 @@ export class SeasProp {
         return q;
     }
 
+    //Get a single property (latest evaluation)
+    getProp(): string {
+        var prefixes = this.input.prefixes;
+        var resource = this.input.resourceURI ? `${this.input.resourceURI}` : '?resource';
+        var property = this.input.propertyURI;
+        var returnResource = this.input.resourceURI ? false : true;
+        var latest = this.input.latest;
+
+        if(!property) return "Please specify a propertyURI";
+
+        var q: string = '';
+        //Define prefixes
+        for(var i in prefixes){
+            q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
+        }
+        q+= `SELECT ?value `;
+        q+= latest ? '(MAX(?t) AS ?timestamp) ' : '(?t AS ?timestamp) ';
+        q+= returnResource ? '?resource ' : ' ';
+        q+= `WHERE {
+                GRAPH ?g {
+                    ${resource} ${property} ?prop .
+                    ?prop seas:evaluation [ seas:evaluatedValue ?value ; prov:wasGeneratedAtTime ?t ] .
+                }
+            } ` 
+        if(latest){
+            q+=`GROUP BY ?value `
+            q+= returnResource ? '?resource' : '';
+        }
+        return q;
+    }
+
+    //Get all properties
     getProps(): string {
         var prefixes = this.input.prefixes;
         var resource = this.input.resourceURI ? `${this.input.resourceURI}` : '?resource';

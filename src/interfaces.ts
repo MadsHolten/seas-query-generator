@@ -8,6 +8,8 @@ export interface ICalc {
 
 export interface IProp {
     resourceURI?: string;
+    propertyURI?: string;
+    latest?: boolean;
     pattern: string;
     value: IVal;
     hostURI: string;
