@@ -9,8 +9,8 @@ var seas_calc = require("../../dist/index");
 var input = {
     resourceURI: "https://localhost/seas/HeatingSystem/b5f9e70e-af29-4c28-a2c5-16ff74645a66",
     //propertyURI: "seas:fluidTemperatureDifference",
-    propertyURI: "https://w3id.org/seas/fluidTemperatureDifference",
-    latest: true
+    propertyURI: "https://w3id.org/seas/fluidReturnTemperature",
+    latest: false
 };
 var sc = new seas_calc.SeasProp(input);
 var q = sc.getProp();

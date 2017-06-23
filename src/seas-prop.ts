@@ -34,7 +34,7 @@ export class SeasProp {
         }
         //If no resource URI is specified, some pattern must exist
         if(!this.input.resourceURI){
-            if(!this.input.pattern){
+            if(!this.input.pattern && !this.input.propertyURI){
                 this.err = "When no resourceURI is specified a pattern must exist!";
             }else{
                 this.input.resourceURI = '?resource';
@@ -152,10 +152,11 @@ export class SeasProp {
     //Get a single property
     getProp(): string {
         var prefixes = this.input.prefixes;
-        var resource = this.input.resourceURI ? `${this.input.resourceURI}` : '?resource';
+        var resource = this.input.resourceURI;
+        var returnResource = this.input.resourceURI == '?resource' ? true : false;
         var property = this.input.propertyURI;
-        var returnResource = this.input.resourceURI ? false : true;
         var latest = this.input.latest;
+        
 
         if(!property) this.err = "Please specify a propertyURI";
 
@@ -165,15 +166,18 @@ export class SeasProp {
             q+= `PREFIX  ${prefixes[i].prefix}: <${prefixes[i].uri}> \n`;
         }
         q+= `SELECT ?value `;
-        q+= latest ? '(MAX(?t) AS ?timestamp) ' : '(?t AS ?timestamp) ';
+        q+= latest ? '(?ts AS ?timestamp) ' : '(MAX(?ts) AS ?timestamp) ';
         q+= returnResource ? '?resource ' : ' ';
         q+= `WHERE {
-                GRAPH ?g {
-                    ${resource} ${property} ?prop .
-                    ?prop seas:evaluation [ seas:evaluatedValue ?value ; prov:wasGeneratedAtTime ?t ] .
-                }
-            } ` 
-        if(latest){
+                GRAPH ?g { `;
+        q+= latest ? `{ SELECT (MAX(?t) AS ?ts) WHERE {
+                        ${resource} ${property} ?prop .
+                        ?prop seas:evaluation/prov:wasGeneratedAtTime ?t .
+                      } GROUP BY ?prop } \n` :  '';
+        q+= `${resource} ${property} ?prop .
+             ?prop seas:evaluation [ prov:wasGeneratedAtTime ?ts ; 
+                                     seas:evaluatedValue ?value ] . } } `; 
+        if(!latest){
             q+=`GROUP BY ?value `
             q+= returnResource ? '?resource' : '';
         }
