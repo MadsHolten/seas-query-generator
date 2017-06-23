@@ -53,6 +53,10 @@ var SeasProp = (function () {
             var propertyURI = this.input.propertyURI;
             this.input.propertyURI = _s.startsWith(propertyURI, 'http') ? "<" + propertyURI + ">" : "" + propertyURI;
         }
+        if (this.input.value.property) {
+            var propertyURI = this.input.value.property;
+            this.input.value.property = _s.startsWith(propertyURI, 'http') ? "<" + propertyURI + ">" : "" + propertyURI;
+        }
     }
     //Create property where it doesn't already exist
     SeasProp.prototype.postProp = function () {

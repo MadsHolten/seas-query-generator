@@ -8,7 +8,8 @@ var input = {
     value: {
         unit: 'Cel',
         datatype: 'cdt:ucum',
-        property: 'seas:fluidSupplyTemperature',
+        //property: 'seas:fluidSupplyTemperature',
+        property: 'https://w3id.org/seas/fluidReturnTemperature',
         value: '70'
     },
     hostURI: 'https://host/proj',
