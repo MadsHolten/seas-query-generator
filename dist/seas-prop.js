@@ -30,6 +30,11 @@ var SeasProp = (function () {
         //datatype defaults to xsd:string
         if (this.input.value) {
             this.input.value.datatype = this.input.value.datatype ? this.input.value.datatype : 'xsd:string';
+            //PropertyURI can be either prefixed or as a regular URI
+            if (this.input.value.property) {
+                var propertyURI = this.input.value.property;
+                this.input.value.property = _s.startsWith(propertyURI, 'http') ? "<" + propertyURI + ">" : "" + propertyURI;
+            }
         }
         //If no resource URI is specified, some pattern must exist
         if (!this.input.resourceURI) {
@@ -52,10 +57,6 @@ var SeasProp = (function () {
         if (this.input.propertyURI) {
             var propertyURI = this.input.propertyURI;
             this.input.propertyURI = _s.startsWith(propertyURI, 'http') ? "<" + propertyURI + ">" : "" + propertyURI;
-        }
-        if (this.input.value.property) {
-            var propertyURI = this.input.value.property;
-            this.input.value.property = _s.startsWith(propertyURI, 'http') ? "<" + propertyURI + ">" : "" + propertyURI;
         }
     }
     //Create property where it doesn't already exist
